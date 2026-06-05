@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}GCSE History Exemplar Generator{% endblock %}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #F4F0FA;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    /* ── Header ──────────────────────────────────────────────────── */
+    header {
+      background: #fff;
+      border-bottom: 3px solid #5B2D8E;
+      padding: 0 32px;
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      min-height: 72px;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      padding: 12px 28px 12px 0;
+      border-right: 1px solid #E8D5F5;
+      flex-shrink: 0;
+    }
+
+    .logo-img {
+      height: 48px;
+      width: auto;
+      display: block;
+      flex-shrink: 0;
+    }
+
+    .header-app {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0 14px 28px;
+      flex: 1;
+    }
+    .header-app-text h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #5B2D8E;
+      line-height: 1.2;
+    }
+    .header-app-text p {
+      font-size: 0.75rem;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .subject-pill {
+      background: #5B2D8E;
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .badge {
+      background: #F4F0FA;
+      color: #5B2D8E;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid #D5B8F0;
+      white-space: nowrap;
+    }
+
+    /* ── Hero banner strip ───────────────────────────────────────── */
+    .hero-strip {
+      background: #5B2D8E;
+      color: #fff;
+      padding: 10px 32px;
+      font-size: 0.8rem;
+      font-style: italic;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Main content ─────────────────────────────────────────────── */
+    main {
+      max-width: 820px;
+      margin: 36px auto;
+      padding: 0 16px 60px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(91,45,142,.08);
+      padding: 32px 36px;
+      margin-bottom: 24px;
+      border-top: 3px solid #5B2D8E;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      color: #5B2D8E;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #E8D5F5;
+    }
+
+    .step-label {
+      display: inline-block;
+      background: #5B2D8E;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 3px;
+      margin-bottom: 10px;
+    }
+
+    label { display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; color: #2a1a3e; }
+    label span { font-weight: 400; color: #888; }
+
+    .field-group { margin-bottom: 22px; }
+
+    input[type="file"] {
+      display: block;
+      width: 100%;
+      border: 2px dashed #D5B8F0;
+      border-radius: 6px;
+      padding: 12px 14px;
+      background: #FAF7FE;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: #444;
+      transition: border-color .2s;
+    }
+    input[type="file"]:hover { border-color: #5B2D8E; }
+
+    input[type="text"], textarea {
+      width: 100%;
+      border: 1.5px solid #ccc;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color .2s;
+    }
+    input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: #5B2D8E;
+      box-shadow: 0 0 0 3px rgba(91,45,142,.12);
+    }
+
+    /* ── Grade grid ──────────────────────────────────────────────── */
+    .grade-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .grade-option { position: relative; }
+    .grade-option input { position: absolute; opacity: 0; width: 0; }
+    .grade-option label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 10px;
+      border: 2px solid #ddd;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all .2s;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .grade-option label span {
+      font-size: 0.72rem;
+      font-weight: 400;
+      color: #666;
+      margin-top: 4px;
+    }
+    .grade-option input:checked + label { border-width: 2px; color: #fff; }
+
+    .grade-1  label { border-color: #C00000; color: #C00000; }
+    .grade-1  input:checked + label { background: #C00000; border-color: #C00000; }
+    .grade-3  label { border-color: #E26B0A; color: #E26B0A; }
+    .grade-3  input:checked + label { background: #E26B0A; border-color: #E26B0A; }
+    .grade-5  label { border-color: #BF8F00; color: #BF8F00; }
+    .grade-5  input:checked + label { background: #BF8F00; border-color: #BF8F00; }
+    .grade-7  label { border-color: #2E75B6; color: #2E75B6; }
+    .grade-7  input:checked + label { background: #2E75B6; border-color: #2E75B6; }
+    .grade-9  label { border-color: #7030A0; color: #7030A0; }
+    .grade-9  input:checked + label { background: #7030A0; border-color: #7030A0; }
+    .grade-all label { border-color: #5B2D8E; color: #5B2D8E; }
+    .grade-all input:checked + label { background: #5B2D8E; border-color: #5B2D8E; }
+
+    .grade-option label span { color: inherit; }
+    .grade-option input:checked + label span { color: rgba(255,255,255,.8); }
+
+    /* ── Buttons ─────────────────────────────────────────────────── */
+    .btn {
+      display: inline-block;
+      padding: 12px 32px;
+      background: #5B2D8E;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+      text-decoration: none;
+    }
+    .btn:hover { background: #421F6E; }
+    .btn:disabled { background: #bbb; cursor: default; }
+
+    .alert {
+      background: #FFF3CD;
+      border: 1px solid #f0c040;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      font-size: 0.88rem;
+      color: #856404;
+    }
+
+    /* ── AO Legend ───────────────────────────────────────────────── */
+    .ao-legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .ao-pill {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .ao1 { background: #BDD7EE; color: #1F497D; }
+    .ao2 { background: #C6EFCE; color: #375623; }
+    .ao3 { background: #FFEB9C; color: #9C5700; }
+
+    /* ── Loading overlay ─────────────────────────────────────────── */
+    #overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(30,10,55,.92);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+    #overlay.show { display: flex; }
+
+    .gen-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 36px 40px;
+      width: 100%;
+      max-width: 480px;
+      color: #1a1a1a;
+      box-shadow: 0 8px 40px rgba(0,0,0,.5);
+      border-top: 4px solid #5B2D8E;
+    }
+    .gen-card h2 {
+      font-size: 1.15rem;
+      color: #5B2D8E;
+      margin-bottom: 6px;
+    }
+    .gen-subtitle {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 22px;
+    }
+
+    /* Progress bar */
+    .progress-track {
+      background: #EDE0F8;
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #5B2D8E, #9B59B6);
+      border-radius: 99px;
+      transition: width 0.7s ease;
+    }
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .progress-pct {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #5B2D8E;
+    }
+    .progress-label {
+      font-size: 0.75rem;
+      color: #888;
+      font-style: italic;
+    }
+
+    /* Checklist */
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .checklist li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: #aaa;
+      transition: color 0.3s;
+    }
+    .checklist li.active  { color: #5B2D8E; font-weight: 600; }
+    .checklist li.done    { color: #375623; }
+
+    .step-icon {
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      border: 2px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      transition: all 0.3s;
+      background: #fff;
+    }
+    .active .step-icon {
+      border-color: #5B2D8E;
+      border-top-color: transparent;
+      animation: spin 0.9s linear infinite;
+    }
+    .done .step-icon {
+      border-color: #375623;
+      background: #375623;
+      color: #fff;
+      font-size: 0.85rem;
+      animation: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .step-detail {
+      font-size: 0.75rem;
+      color: #999;
+      font-weight: 400;
+      margin-top: 1px;
+    }
+    .active .step-detail { color: #9B59B6; }
+    .done  .step-detail  { color: #88b08a; }
+
+    .gen-status {
+      font-size: 0.8rem;
+      color: #888;
+      text-align: center;
+      font-style: italic;
+      border-top: 1px solid #eee;
+      padding-top: 16px;
+    }
+
+    /* ── Footer ──────────────────────────────────────────────────── */
+    footer {
+      background: #5B2D8E;
+      color: rgba(255,255,255,.7);
+      text-align: center;
+      font-size: 0.75rem;
+      padding: 16px 20px;
+      margin-top: 40px;
+    }
+    footer strong { color: #fff; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<header>
+  <!-- Outwood Academy Newbold logo -->
+  <div class="header-logo">
+    <img src="{{ url_for('static', filename='outwood_logo.png') }}" alt="Outwood Academy Newbold" class="logo-img">
+  </div>
+
+  <!-- App title -->
+  <div class="header-app">
+    <div class="header-app-text">
+      <h1>GCSE History — Edexcel</h1>
+      <p>Examiner Exemplar Answer Generator</p>
+    </div>
+    <div class="header-right">
+      <span class="subject-pill">History</span>
+    </div>
+  </div>
+</header>
+
+<div class="hero-strip">
+  Students first: <em>raising standards and transforming lives.</em>
+</div>
+
+<main>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for m in messages %}
+        <div class="alert">{{ m }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<div id="overlay">
+  <div class="gen-card">
+    <h2>Generating Exemplar Answers</h2>
+    <p class="gen-subtitle">Claude Opus is working through your documents — this takes 60–90 seconds</p>
+
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-row">
+      <span class="progress-label" id="progress-label">Starting…</span>
+      <span class="progress-pct" id="progress-pct">0%</span>
+    </div>
+
+    <ul class="checklist">
+      <li id="step-1" class="pending">
+        <span class="step-icon"></span>
+        <span>
+          Read &amp; parse uploaded documents
+          <div class="step-detail">Question paper, mark scheme, examiner insights</div>
+        </span>
+      </li>
+      <li id="step-2" class="pending">
+        <span class="step-icon"></span>
+        <span>
+          Analyse mark scheme with Opus AI
+          <div class="step-detail">Extract grade descriptors, boundaries &amp; examiner insights</div>
+        </span>
+      </li>
+      <li id="step-3" class="pending">
+        <span class="step-icon"></span>
+        <span>
+          Generate grade-accurate exemplar answers
+          <div class="step-detail" id="step-3-detail">Grades selected</div>
+        </span>
+      </li>
+      <li id="step-4" class="pending">
+        <span class="step-icon"></span>
+        <span>
+          Build colour-coded Word document
+          <div class="step-detail">AO annotations, examiner justification, mark tables</div>
+        </span>
+      </li>
+    </ul>
+
+    <p class="gen-status" id="gen-status">Waiting to start…</p>
+  </div>
+</div>
+
+<footer>
+  <strong>GCSE History Exemplar Generator</strong> — Outwood Academy Newbold
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

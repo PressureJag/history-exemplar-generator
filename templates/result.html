@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Download Ready — GCSE History Exemplar{% endblock %}
+
+{% block content %}
+<div class="card" style="text-align:center;padding:48px 36px;">
+  <div style="font-size:3rem;margin-bottom:16px;">✅</div>
+  <h2 style="border:none;font-size:1.4rem;color:#375623;margin-bottom:12px;">
+    Your Exemplar Document is Ready
+  </h2>
+  <p style="font-size:0.9rem;color:#555;margin-bottom:32px;">
+    Claude has generated your colour-coded exemplar answers with examiner annotations.<br>
+    Click below to download your Word document.
+  </p>
+
+  <a href="/download/{{ filename }}" class="btn" style="font-size:1rem;padding:14px 40px;">
+    ⬇  Download Word Document
+  </a>
+
+  <div style="margin-top:40px;padding-top:24px;border-top:1px solid #eee;">
+    <a href="/" style="font-size:0.88rem;color:#1F497D;">← Generate another exemplar</a>
+  </div>
+</div>
+
+<div class="card" style="background:#f7fbff;">
+  <h2 style="font-size:0.9rem;">What's in your document?</h2>
+  <ul style="font-size:0.85rem;color:#444;line-height:1.9;padding-left:20px;margin-top:8px;">
+    <li>The full exam question and assessment objectives breakdown</li>
+    <li>One full exemplar answer per selected grade</li>
+    <li>Every paragraph annotated by Assessment Objective (colour-coded)</li>
+    <li>Examiner justification note for each section explaining why it earns marks</li>
+    <li>A mark justification table per grade showing AO-by-AO reasoning</li>
+    <li>Grade characteristics — what the answer demonstrates and what it needs to improve</li>
+  </ul>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Auto-trigger download on page load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      window.location.href = '/download/{{ filename }}';
+    }, 800);
+  });
+</script>
+{% endblock %}

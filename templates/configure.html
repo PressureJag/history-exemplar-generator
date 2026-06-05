@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Configure — GCSE History Exemplar{% endblock %}
+
+{% block content %}
+<div class="card">
+  <span class="step-label">STEP 2 OF 2</span>
+  <h2>Configure Your Exemplar</h2>
+  <p style="font-size:0.88rem;color:#555;margin-bottom:24px;">
+    Your three documents have been uploaded. Tell Claude which question to answer and which grade(s) to generate.
+  </p>
+
+  <form id="gen-form">
+
+    <div class="field-group">
+      <label>
+        Which question do you want answered?
+        <span>— e.g. "Question 4(b)" or paste the full question text</span>
+      </label>
+      <input
+        type="text"
+        name="question_ref"
+        id="question_ref"
+        placeholder='e.g. "Question 4" or paste the full question text'
+        required
+        autocomplete="off"
+      >
+    </div>
+
+    <div class="field-group">
+      <label>Select grade(s) to generate</label>
+      <p style="font-size:0.8rem;color:#666;margin-bottom:12px;">
+        Select individual grades or <strong>All Grades</strong> for a full progression document.
+      </p>
+
+      <div class="grade-grid">
+        <div class="grade-option grade-1">
+          <input type="checkbox" name="grades" value="1" id="g1">
+          <label for="g1">Grade 1<span>Below standard</span></label>
+        </div>
+        <div class="grade-option grade-3">
+          <input type="checkbox" name="grades" value="3" id="g3">
+          <label for="g3">Grade 3<span>Developing</span></label>
+        </div>
+        <div class="grade-option grade-5">
+          <input type="checkbox" name="grades" value="5" id="g5">
+          <label for="g5">Grade 5<span>Solid pass</span></label>
+        </div>
+        <div class="grade-option grade-7">
+          <input type="checkbox" name="grades" value="7" id="g7">
+          <label for="g7">Grade 7<span>Strong pass</span></label>
+        </div>
+        <div class="grade-option grade-9">
+          <input type="checkbox" name="grades" value="9" id="g9">
+          <label for="g9">Grade 9<span>Exceptional</span></label>
+        </div>
+        <div class="grade-option grade-all">
+          <input type="checkbox" name="grades" value="all" id="gall">
+          <label for="gall">All Grades<span>Full progression</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div id="form-error" class="alert" style="display:none;"></div>
+
+    <button type="submit" class="btn" id="gen-btn">Generate Exemplar →</button>
+    <a href="/" style="margin-left:16px;font-size:0.85rem;color:#666;">← Re-upload documents</a>
+
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // ── Grade checkbox mutual exclusion ──────────────────────────────────────
+  const allCb   = document.getElementById('gall');
+  const gradeCbs = ['g1','g3','g5','g7','g9'].map(id => document.getElementById(id));
+
+  allCb.addEventListener('change', () => {
+    if (allCb.checked) gradeCbs.forEach(cb => cb.checked = false);
+  });
+  gradeCbs.forEach(cb => cb.addEventListener('change', () => {
+    if (cb.checked) allCb.checked = false;
+  }));
+
+  // ── Progress bar helpers ──────────────────────────────────────────────────
+  const fillEl    = document.getElementById('progress-fill');
+  const pctEl     = document.getElementById('progress-pct');
+  const labelEl   = document.getElementById('progress-label');
+  const statusEl  = document.getElementById('gen-status');
+  let creepTimer  = null;
+  let currentPct  = 0;
+
+  function setProgress(target, label) {
+    clearInterval(creepTimer);
+    currentPct = target;
+    fillEl.style.width = target + '%';
+    pctEl.textContent  = Math.round(target) + '%';
+    if (label) labelEl.textContent = label;
+  }
+
+  function startCreep(from, ceiling) {
+    // Slowly inch the bar forward so it never looks stuck
+    clearInterval(creepTimer);
+    currentPct = from;
+    const step = (ceiling - from) / 120;   // reach ceiling over ~2 min
+    creepTimer = setInterval(() => {
+      currentPct = Math.min(currentPct + step, ceiling);
+      fillEl.style.width = currentPct + '%';
+      pctEl.textContent  = Math.round(currentPct) + '%';
+    }, 1000);
+  }
+
+  // ── Checklist helpers ─────────────────────────────────────────────────────
+  let activeStep = 0;
+
+  function activateStep(n, detail) {
+    // Mark previous step done
+    if (activeStep > 0) {
+      const prev = document.getElementById('step-' + activeStep);
+      prev.classList.remove('active');
+      prev.classList.add('done');
+      prev.querySelector('.step-icon').textContent = '✓';
+    }
+    activeStep = n;
+    const el = document.getElementById('step-' + n);
+    el.classList.remove('pending');
+    el.classList.add('active');
+    if (detail) {
+      const d = el.querySelector('[id^="step-' + n + '-"]') ||
+                el.querySelector('.step-detail');
+      if (d) d.textContent = detail;
+    }
+  }
+
+  function completeAllSteps() {
+    clearInterval(creepTimer);
+    for (let i = 1; i <= 4; i++) {
+      const el = document.getElementById('step-' + i);
+      el.classList.remove('pending', 'active');
+      el.classList.add('done');
+      el.querySelector('.step-icon').textContent = '✓';
+    }
+    setProgress(100, 'Complete');
+    statusEl.textContent = 'All done — loading your document…';
+  }
+
+  // ── Stage → step + progress mapping ──────────────────────────────────────
+  function handleStage(msg) {
+    statusEl.textContent = msg;
+
+    if (msg.startsWith('Reading')) {
+      activateStep(1);
+      setProgress(8, 'Reading files…');
+      startCreep(8, 18);
+
+    } else if (msg.startsWith('Analysing')) {
+      activateStep(2);
+      setProgress(22, 'Analysing with Opus…');
+      startCreep(22, 52);
+
+    } else if (msg.startsWith('Generating')) {
+      // Extract grade info from message for step 3 detail
+      const grades = msg.replace('Generating exemplar answers (', '').replace(')…', '');
+      activateStep(3, grades);
+      setProgress(56, 'Writing exemplars…');
+      startCreep(56, 84);
+
+    } else if (msg.startsWith('Building')) {
+      activateStep(4);
+      setProgress(87, 'Building Word document…');
+      startCreep(87, 96);
+    }
+  }
+
+  // ── Form submission ───────────────────────────────────────────────────────
+  document.getElementById('gen-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const qRef    = document.getElementById('question_ref').value.trim();
+    const anyGrade = allCb.checked || gradeCbs.some(cb => cb.checked);
+    const errDiv   = document.getElementById('form-error');
+
+    if (!qRef) {
+      errDiv.textContent = 'Please enter the question reference or question text.';
+      errDiv.style.display = 'block';
+      return;
+    }
+    if (!anyGrade) {
+      errDiv.textContent = 'Please select at least one grade.';
+      errDiv.style.display = 'block';
+      return;
+    }
+    errDiv.style.display = 'none';
+
+    // Update step 3 detail with selected grades before overlay shows
+    const gradeNames = { '1':'Grade 1','3':'Grade 3','5':'Grade 5','7':'Grade 7','9':'Grade 9' };
+    let gradeList = allCb.checked
+      ? 'Grade 1, 3, 5, 7 & 9'
+      : gradeCbs.filter(cb => cb.checked).map(cb => gradeNames[cb.value]).join(', ');
+    document.getElementById('step-3-detail').textContent = gradeList;
+
+    const formData = new FormData(this);
+    document.getElementById('gen-btn').disabled = true;
+    document.getElementById('overlay').classList.add('show');
+    setProgress(3, 'Starting…');
+
+    try {
+      const res    = await fetch('/generate', { method: 'POST', body: formData });
+      const reader = res.body.getReader();
+      const dec    = new TextDecoder();
+      let buffer   = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += dec.decode(value, { stream: true });
+
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+
+          if (data.startsWith('DONE:')) {
+            completeAllSteps();
+            setTimeout(() => {
+              window.location.href = '/result?file=' + encodeURIComponent(data.slice(5));
+            }, 900);
+            return;
+
+          } else if (data.startsWith('ERROR:')) {
+            clearInterval(creepTimer);
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('gen-btn').disabled = false;
+            errDiv.textContent = data.slice(6);
+            errDiv.style.display = 'block';
+            return;
+
+          } else if (data) {
+            handleStage(data);
+          }
+        }
+      }
+    } catch (err) {
+      clearInterval(creepTimer);
+      document.getElementById('overlay').classList.remove('show');
+      document.getElementById('gen-btn').disabled = false;
+      errDiv.textContent = 'Network error — please try again.';
+      errDiv.style.display = 'block';
+    }
+  });
+</script>
+{% endblock %}

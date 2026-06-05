@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Documents — GCSE History Exemplar{% endblock %}
+
+{% block content %}
+<div class="card">
+  <span class="step-label">STEP 1 OF 2</span>
+  <h2>Upload Your Documents</h2>
+  <p style="font-size:0.88rem;color:#555;margin-bottom:24px;">
+    Upload all three Edexcel source documents below. PDF and Word (.docx) files are accepted.
+    Claude will read all three before generating any exemplar answers.
+  </p>
+
+  <form method="POST" action="/upload" enctype="multipart/form-data">
+
+    <div class="field-group">
+      <label>
+        Question Paper
+        <span>— the full exam paper containing the question you want answered</span>
+      </label>
+      <input type="file" name="question_paper" accept=".pdf,.docx" required>
+    </div>
+
+    <div class="field-group">
+      <label>
+        Mark Scheme
+        <span>— the official Edexcel mark scheme for this paper</span>
+      </label>
+      <input type="file" name="mark_scheme" accept=".pdf,.docx" required>
+    </div>
+
+    <div class="field-group">
+      <label>
+        Examiner Insights / Report
+        <span>— the examiner's report or any additional guidance document</span>
+      </label>
+      <input type="file" name="examiner_insights" accept=".pdf,.docx" required>
+    </div>
+
+    <button type="submit" class="btn">Upload &amp; Continue →</button>
+  </form>
+</div>
+
+<div class="card" style="background:#FAF7FE; border-top-color:#C4972A;">
+  <h2 style="font-size:0.9rem;">Annotation colour coding in the output document</h2>
+  <div class="ao-legend">
+    <div class="ao-pill ao1">AO1 — Knowledge &amp; Understanding</div>
+    <div class="ao-pill ao2">AO2 — Analysis &amp; Evaluation</div>
+    <div class="ao-pill ao3">AO3 — Communication</div>
+  </div>
+  <p style="font-size:0.8rem;color:#666;margin-top:12px;">
+    Each paragraph in the exemplar answer is colour-coded to the Assessment Objective it primarily demonstrates,
+    with an examiner justification note explaining why it earns marks.
+  </p>
+</div>
+{% endblock %}

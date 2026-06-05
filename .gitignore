@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+*.log
+
+# Flask session / runtime
+instance/
+.flask_session/
+
+# Uploaded files (contain student/exam data — never commit)
+uploads/
+
+# Generated output documents
+output/
+
+# Test / scratch files
+grade7_railroad_exemplar.json
+requestiongenerator/
+
+# macOS
+.DS_Store
